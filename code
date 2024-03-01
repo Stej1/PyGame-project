@@ -1,0 +1,115 @@
+import pygame
+import random
+
+# Инициализация Pygame
+pygame.init()
+# Определение размеров окна
+WIDTH, HEIGHT = 800, 600
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Виселица")
+# Определение цветов
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+# Загрузка изображений для каждой стадии виселицы
+IMAGES = [
+    pygame.image.load("hangman0.png"),
+    pygame.image.load("hangman1.png"),
+    pygame.image.load("hangman2.png"),
+    pygame.image.load("hangman3.png"),
+    pygame.image.load("hangman4.png"),
+    pygame.image.load("hangman5.png"),
+    pygame.image.load("hangman6.png")
+]
+# Определение списка слов
+WORDS = ["HELLO", "WORLD", "PYTHON", "PROGRAMMING", "DATA", "SCIENCE", "COMPUTER",
+    "ENGINEERING", "ARTIFICIAL", "INTELLIGENCE", "MACHINE", "LEARNING", "DEVELOPMENT",
+    "ALGORITHM", "CODING", "ANALYSIS", "DESIGN", "DATABASE", "NETWORK", "SECURITY",
+    "WEB", "DEVELOPER", "SOFTWARE", "HARDWARE", "INTERFACE", "MOBILE", "APPLICATION",
+    "GAME", "GRAPHICS", "OPERATING", "SYSTEM", "CLOUD", "ARCHITECTURE", "INFORMATION",
+    "TECHNOLOGY", "DIGITAL", "INNOVATION", "BLOCKCHAIN", "CRYPTOGRAPHY", "BIG", "DATA",
+    "SERVER", "INFRASTRUCTURE", "PROGRAM", "DEBUGGING", "FRAMEWORK", "SCRIPTING",
+    "PERFORMANCE", "OPTIMIZATION", "VERSION", "CONTROL", "REPOSITORY", "DOCUMENTATION",
+    "DEBUGGER", "TESTING", "AUTOMATION", "INTEGRATION", "SECURE", "CRYPTO", "TOKEN",
+    "DISTRIBUTED", "LEDGER", "TRANSACTION", "VALIDATION", "ANALYTICS", "VISUALIZATION",
+    "RESEARCH", "EDUCATION", "TRAINING", "CERTIFICATION", "PROJECT", "MANAGEMENT",
+    "AGILE", "SCRUM", "WATERFALL", "ITERATIVE", "DEVELOPMENT", "PROTOTYPE", "RELEASE",
+    "BUILD", "DEPLOYMENT", "MAINTENANCE", "SUPPORT", "HELPDESK", "SERVICE", "LEVEL",
+    "AGREEMENT", "CONSULTING", "OUTSOURCING", "PARTNERSHIP", "COLLABORATION", "COMMUNICATION",
+    "TEAMWORK", "LEADERSHIP", "SKILLS", "KNOWLEDGE", "EXPERIENCE", "CAREER", "PROFESSIONAL",
+    "GROWTH", "OPPORTUNITY", "NETWORKING", "MENTORING", "COACHING", "SUCCESS", "ACHIEVEMENT"]
+
+
+# Определение класса игры
+class HangmanGame:
+    def __init__(self):
+        self.word = random.choice(WORDS).upper()
+        self.guessed_letters = set()
+        self.attempts = 0
+
+    def draw(self):
+        WIN.fill(WHITE)
+        # Отрисовка изображения виселицы
+        image = IMAGES[self.attempts]
+        WIN.blit(image, (WIDTH // 2 - image.get_width() + 75, HEIGHT // 2 - image.get_height() // 2))
+
+        # Отрисовка загаданного слова
+        display_word = ""
+        for letter in self.word:
+            if letter in self.guessed_letters:
+                display_word += letter + " "
+            else:
+                display_word += "_ "
+        font = pygame.font.SysFont("Arial", 40)
+        text = font.render(display_word, True, BLACK)
+        WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 + 150))
+
+    def handle_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                quit()
+            elif event.unicode.isalpha():
+                letter = event.unicode.upper()
+                if letter not in self.guessed_letters:
+                    self.guessed_letters.add(letter)
+                    if letter not in self.word:
+                        self.attempts += 1
+
+    def is_game_over(self):
+        return self.attempts == len(IMAGES) - 1 or all(letter in self.guessed_letters for letter in self.word)
+
+    def run(self):
+        clock = pygame.time.Clock()
+        game_over = False
+
+        while not game_over:
+            clock.tick(60)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+                else:
+                    self.handle_event(event)
+
+            self.draw()
+            pygame.display.update()
+
+            if self.is_game_over():
+                game_over = True
+
+        # Вывод сообщения о победе или поражении
+        font = pygame.font.SysFont("Arial", 60)
+        if all(letter in self.guessed_letters for letter in self.word):
+            text = font.render("Вы победили!", True, BLACK)
+        else:
+            text = font.render("Вы проиграли!", True, BLACK)
+        WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT - text.get_height()))
+        pygame.display.update()
+        pygame.time.wait(3000)
+
+
+# Запуск игры
+if __name__ == "__main__":
+    game = HangmanGame()
+    game.run()
